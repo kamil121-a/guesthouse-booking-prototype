@@ -1,60 +1,82 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import "react-day-picker/style.css";
+import { useEffect, useMemo, useState } from "react";
 import {
   differenceInCalendarDays,
   eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
   format,
-  isBefore,
-  isWithinInterval,
+  isSameDay,
   parseISO,
-  startOfDay,
-  startOfMonth,
-  startOfWeek
+  startOfDay
 } from "date-fns";
-import { CalendarDays, Car, Coffee, Mountain, Wifi } from "lucide-react";
+import type { DateRange, Matcher } from "react-day-picker";
+import { DayPicker } from "react-day-picker";
+import { CalendarDays, Car, Tv, UtensilsCrossed, Wifi } from "lucide-react";
 import { blockedRanges, nightlyPrice } from "@/data/mockData";
 import { supabase } from "@/lib/supabaseClient";
 
-function isBlockedDate(date: Date) {
-  return blockedRanges.some((range) => {
-    const from = parseISO(range.from);
-    const to = parseISO(range.to);
-    return isWithinInterval(date, { start: from, end: to });
-  });
-}
-
-function isIntervalAvailable(from: Date, to: Date) {
-  const allDays = eachDayOfInterval({ start: from, end: to });
-  return allDays.every((day) => !isBlockedDate(day));
-}
+type BookingDateRow = {
+  check_in: string;
+  check_out: string;
+};
 
 export default function HomePage() {
   const today = startOfDay(new Date());
-  const yearNow = today.getFullYear();
-  const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
-  const [selectedYear, setSelectedYear] = useState(yearNow);
-
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
+  const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [propertyName, setPropertyName] = useState("Pensjonat Blekitny Brzeg");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isSavingBooking, setIsSavingBooking] = useState(false);
+  const [blockedFromDb, setBlockedFromDb] = useState<Date[]>([]);
 
-  const visibleMonth = new Date(selectedYear, selectedMonth, 1);
-  const monthStart = startOfWeek(startOfMonth(visibleMonth), { weekStartsOn: 1 });
-  const monthEnd = endOfWeek(endOfMonth(visibleMonth), { weekStartsOn: 1 });
-  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const fromDate = selectedRange?.from;
+  const toDate = selectedRange?.to;
+
+  const blockedFromMock = useMemo(() => {
+    return blockedRanges.flatMap((range) =>
+      eachDayOfInterval({ start: parseISO(range.from), end: parseISO(range.to) }).map((day) => startOfDay(day))
+    );
+  }, []);
+
+  useEffect(() => {
+    async function fetchBlockedDates() {
+      const { data, error } = await supabase.from("bookings").select("check_in, check_out");
+
+      if (error || !data) {
+        return;
+      }
+
+      const mapped = (data as BookingDateRow[]).flatMap((row) => {
+        const start = parseISO(row.check_in);
+        const end = parseISO(row.check_out);
+        return eachDayOfInterval({ start, end }).map((day) => startOfDay(day));
+      });
+
+      setBlockedFromDb(mapped);
+    }
+
+    void fetchBlockedDates();
+  }, []);
+
+  const blockedDates = useMemo(() => {
+    const merged = [...blockedFromMock, ...blockedFromDb];
+    return merged.filter((date, idx) => merged.findIndex((other) => isSameDay(other, date)) === idx);
+  }, [blockedFromMock, blockedFromDb]);
+
+  function isIntervalAvailable(from: Date, to: Date) {
+    const allDays = eachDayOfInterval({ start: from, end: to });
+    return allDays.every((day) => !blockedDates.some((blockedDate) => isSameDay(blockedDate, day)));
+  }
+
+  const disabledDays: Matcher[] = [{ before: today }, ...blockedDates];
 
   const nights = useMemo(() => {
-    if (!fromDate || !toDate) {
+    if (!fromDate || !toDate || isSameDay(fromDate, toDate)) {
       return 0;
     }
-    return differenceInCalendarDays(toDate, fromDate) + 1;
+    return differenceInCalendarDays(toDate, fromDate);
   }, [fromDate, toDate]);
 
   const totalPrice = nights > 0 ? nights * nightlyPrice : 0;
@@ -78,32 +100,6 @@ export default function HomePage() {
     }
   }
 
-  function handleDayClick(day: Date) {
-    setFeedback(null);
-
-    if (isBefore(day, today) || isBlockedDate(day)) {
-      return;
-    }
-
-    if (!fromDate || toDate) {
-      setFromDate(day);
-      setToDate(null);
-      return;
-    }
-
-    if (isBefore(day, fromDate)) {
-      setFromDate(day);
-      return;
-    }
-
-    if (!isIntervalAvailable(fromDate, day)) {
-      setFeedback("Wybrany zakres zawiera zajete dni. Wybierz inny termin.");
-      return;
-    }
-
-    setToDate(day);
-  }
-
   async function handleBookingSubmit() {
     setFeedback(null);
 
@@ -123,8 +119,7 @@ export default function HomePage() {
       setFeedback("Rezerwacja zapisana w bazie!");
       setGuestName("");
       setGuestEmail("");
-      setFromDate(null);
-      setToDate(null);
+      setSelectedRange(undefined);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Nieznany blad zapisu.";
       setFeedback(`Blad zapisu do bazy: ${message}`);
@@ -134,7 +129,7 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 md:p-8">
+    <main className="min-h-screen bg-slate-50 p-4 pb-24 md:p-8 md:pb-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <section className="overflow-hidden rounded-3xl bg-white shadow-lg shadow-brand-100/40 ring-1 ring-slate-200">
           <div className="relative h-[300px] w-full md:h-[420px]">
@@ -166,22 +161,22 @@ export default function HomePage() {
 
             <div>
               <h3 className="text-lg font-semibold text-slate-900">Udogodnienia</h3>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
                   <Wifi className="text-brand-600" size={20} />
                   <span className="text-sm font-medium text-slate-700">Szybkie Wi-Fi</span>
-                </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-                  <Coffee className="text-brand-600" size={20} />
-                  <span className="text-sm font-medium text-slate-700">Ekspres do kawy</span>
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
                   <Car className="text-brand-600" size={20} />
                   <span className="text-sm font-medium text-slate-700">Prywatny parking</span>
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-                  <Mountain className="text-brand-600" size={20} />
-                  <span className="text-sm font-medium text-slate-700">Widok na nature</span>
+                  <UtensilsCrossed className="text-brand-600" size={20} />
+                  <span className="text-sm font-medium text-slate-700">W pelni wyposazona kuchnia</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Tv className="text-brand-600" size={20} />
+                  <span className="text-sm font-medium text-slate-700">Smart TV 55"</span>
                 </div>
               </div>
             </div>
@@ -193,88 +188,39 @@ export default function HomePage() {
               <h2 className="text-xl font-semibold text-slate-900">Booking Card</h2>
             </div>
 
-            <div className="mb-4 grid gap-3 sm:grid-cols-2">
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
-              >
-                {[
-                  "Styczen",
-                  "Luty",
-                  "Marzec",
-                  "Kwiecien",
-                  "Maj",
-                  "Czerwiec",
-                  "Lipiec",
-                  "Sierpien",
-                  "Wrzesien",
-                  "Pazdziernik",
-                  "Listopad",
-                  "Grudzien"
-                ].map((monthLabel, idx) => (
-                  <option key={monthLabel} value={idx}>
-                    {monthLabel}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
-              >
-                {Array.from({ length: 7 }).map((_, idx) => {
-                  const year = yearNow - 1 + idx;
-                  return (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-slate-500">
-              {["Pon", "Wt", "Sr", "Czw", "Pt", "Sob", "Niedz"].map((label) => (
-                <span key={label}>{label}</span>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {calendarDays.map((day) => {
-                const blocked = isBlockedDate(day);
-                const past = isBefore(day, today);
-                const outOfMonth = day.getMonth() !== selectedMonth;
-                const selectedFrom = fromDate && format(day, "yyyy-MM-dd") === format(fromDate, "yyyy-MM-dd");
-                const selectedTo = toDate && format(day, "yyyy-MM-dd") === format(toDate, "yyyy-MM-dd");
-                const inSelectedRange = fromDate && toDate && isWithinInterval(day, { start: fromDate, end: toDate });
-
-                return (
-                  <button
-                    key={day.toISOString()}
-                    type="button"
-                    onClick={() => handleDayClick(day)}
-                    className={`h-9 rounded-lg text-xs transition ${
-                      outOfMonth
-                        ? "bg-slate-50 text-slate-300"
-                        : past
-                          ? "cursor-not-allowed bg-slate-100 text-slate-300"
-                          : blocked
-                            ? "cursor-not-allowed bg-rose-100 text-rose-500"
-                            : selectedFrom || selectedTo
-                              ? "bg-brand-600 font-semibold text-white"
-                              : inSelectedRange
-                                ? "bg-brand-100 text-brand-700"
-                                : "bg-slate-100 text-slate-700 hover:bg-brand-50"
-                    }`}
-                  >
-                    {format(day, "d")}
-                  </button>
-                );
-              })}
+            <div className="rounded-2xl border border-slate-200 bg-white p-3">
+              <DayPicker
+                mode="range"
+                selected={selectedRange}
+                onSelect={setSelectedRange}
+                disabled={disabledDays}
+                numberOfMonths={1}
+                weekStartsOn={1}
+                className="text-sm"
+                classNames={{
+                  months: "flex flex-col",
+                  month: "space-y-2",
+                  caption: "flex items-center justify-between px-1 pt-1",
+                  caption_label: "text-sm font-semibold text-slate-800",
+                  nav: "flex items-center gap-1",
+                  button_previous: "rounded-lg border border-slate-200 p-1 hover:bg-slate-100",
+                  button_next: "rounded-lg border border-slate-200 p-1 hover:bg-slate-100",
+                  table: "w-full border-collapse",
+                  weekdays: "grid grid-cols-7 gap-1 mt-2",
+                  weekday: "text-center text-[11px] font-medium text-slate-500",
+                  week: "grid grid-cols-7 gap-1 mt-1",
+                  day: "h-9 w-full rounded-lg text-xs",
+                  day_button: "h-9 w-full rounded-lg hover:bg-brand-50",
+                  selected: "bg-brand-600 text-white hover:bg-brand-600",
+                  range_middle: "bg-brand-100 text-brand-700",
+                  today: "border border-brand-300",
+                  disabled: "text-slate-300 line-through"
+                }}
+              />
             </div>
 
             <div className="mt-5 space-y-2 rounded-2xl bg-brand-50 p-4">
+              <p className="text-xs uppercase tracking-wide text-brand-700">Podsumowanie pobytu</p>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-slate-500">Od</span>
                 <span className="font-medium text-slate-800">{fromDate ? format(fromDate, "dd.MM.yyyy") : "-"}</span>
@@ -319,7 +265,7 @@ export default function HomePage() {
                 type="button"
                 onClick={handleBookingSubmit}
                 disabled={isSavingBooking}
-                className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70"
+                className="hidden w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70 md:block"
               >
                 {isSavingBooking ? "Zapisywanie..." : "Zarezerwuj teraz"}
               </button>
@@ -328,6 +274,23 @@ export default function HomePage() {
             {feedback && <p className="mt-3 text-sm text-brand-700">{feedback}</p>}
           </aside>
         </section>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-slate-500">{nights > 0 ? `${nights} nocy` : "Wybierz termin"}</p>
+            <p className="text-lg font-semibold text-brand-900">{totalPrice ? `${totalPrice} zl` : "-"}</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleBookingSubmit}
+            disabled={isSavingBooking}
+            className="rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-70"
+          >
+            {isSavingBooking ? "Zapisywanie..." : "Zarezerwuj teraz"}
+          </button>
+        </div>
       </div>
     </main>
   );
