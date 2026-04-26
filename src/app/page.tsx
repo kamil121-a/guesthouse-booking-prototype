@@ -12,7 +12,7 @@ import {
 } from "date-fns";
 import type { DateRange, Matcher } from "react-day-picker";
 import { DayPicker } from "react-day-picker";
-import { CalendarDays, Car, Coffee, Laptop, Tv, Utensils, WashingMachine, Wifi, Wind } from "lucide-react";
+import { CalendarDays, Car, Coffee, Laptop, MapPin, Tv, Utensils, WashingMachine, Wifi, Wind } from "lucide-react";
 import { blockedRanges, nightlyPrice } from "@/data/mockData";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -196,6 +196,45 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Lokalizacja</h3>
+              <div className="mt-4 grid gap-6 lg:grid-cols-2">
+                <div className="overflow-hidden rounded-2xl">
+                  <iframe
+                    title="Lokalizacja apartamentu"
+                    src="https://www.google.com/maps?q=Sopot%20Poland&output=embed"
+                    className="h-[400px] w-full border-0"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </div>
+                <div className="rounded-2xl bg-gray-50 p-6">
+                  <h4 className="text-base font-semibold text-slate-900">Co jest w poblizu?</h4>
+                  <ul className="mt-4 space-y-3">
+                    <li className="flex items-start gap-3 text-sm text-slate-700">
+                      <MapPin className="mt-0.5 shrink-0 text-blue-600" size={18} />
+                      <span>Plaza glowna: 10 min spacerem</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-slate-700">
+                      <MapPin className="mt-0.5 shrink-0 text-blue-600" size={18} />
+                      <span>Restauracja 'Pod Wydma': 2 min spacerem</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-slate-700">
+                      <MapPin className="mt-0.5 shrink-0 text-blue-600" size={18} />
+                      <span>Sklep spozywczy: 300 m</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm text-slate-700">
+                      <MapPin className="mt-0.5 shrink-0 text-blue-600" size={18} />
+                      <span>Przystanek autobusowy: 5 min spacerem</span>
+                    </li>
+                  </ul>
+                  <p className="mt-5 text-sm text-slate-500">
+                    Dokladny adres otrzymasz w wiadomosci e-mail po dokonaniu rezerwacji.
+                  </p>
+                </div>
+              </div>
+            </div>
           </article>
 
           <aside className="rounded-3xl bg-white p-6 shadow-lg shadow-brand-100/40 ring-1 ring-slate-200 md:p-7">
@@ -212,7 +251,7 @@ export default function HomePage() {
                 disabled={disabledDays}
                 numberOfMonths={1}
                 weekStartsOn={1}
-                className="w-full text-sm"
+                className="w-full text-sm [&_.rdp-month]:w-full [&_.rdp-month_grid]:w-full [&_.rdp-months]:w-full [&_.rdp-root]:w-full [&_.rdp-table]:w-full"
                 classNames={{
                   months: "flex w-full flex-col",
                   month: "w-full space-y-2",
@@ -221,7 +260,7 @@ export default function HomePage() {
                   nav: "flex items-center gap-1",
                   button_previous: "rounded-lg border border-slate-200 p-1 hover:bg-slate-100",
                   button_next: "rounded-lg border border-slate-200 p-1 hover:bg-slate-100",
-                  table: "w-full border-collapse",
+                  table: "w-full border-collapse table-fixed",
                   weekdays: "grid grid-cols-7 gap-1 mt-2",
                   weekday: "text-center text-[11px] font-medium text-slate-500",
                   week: "grid grid-cols-7 gap-1 mt-1",
@@ -231,6 +270,10 @@ export default function HomePage() {
                   range_middle: "bg-brand-100 text-brand-700",
                   today: "border border-brand-300",
                   disabled: "text-slate-300 line-through"
+                }}
+                styles={{
+                  month: { width: "100%" },
+                  table: { width: "100%", tableLayout: "fixed" }
                 }}
               />
             </div>
