@@ -12,7 +12,7 @@ import {
 } from "date-fns";
 import type { DateRange, Matcher } from "react-day-picker";
 import { DayPicker } from "react-day-picker";
-import { CalendarDays, Car, Tv, UtensilsCrossed, Wifi } from "lucide-react";
+import { CalendarDays, Car, Coffee, Laptop, Tv, Utensils, WashingMachine, Wifi, Wind } from "lucide-react";
 import { blockedRanges, nightlyPrice } from "@/data/mockData";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -160,23 +160,39 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-slate-900">Udogodnienia</h3>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-                  <Wifi className="text-brand-600" size={20} />
-                  <span className="text-sm font-medium text-slate-700">Szybkie Wi-Fi</span>
+              <h3 className="text-lg font-semibold text-slate-900">Amenities</h3>
+              <div className="mt-4 grid grid-cols-2 gap-6 md:grid-cols-4">
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Wifi className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Szybkie Wi-Fi</span>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-                  <Car className="text-brand-600" size={20} />
-                  <span className="text-sm font-medium text-slate-700">Prywatny parking</span>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Car className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Bezplatny parking</span>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-                  <UtensilsCrossed className="text-brand-600" size={20} />
-                  <span className="text-sm font-medium text-slate-700">W pelni wyposazona kuchnia</span>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Wind className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Klimatyzacja</span>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
-                  <Tv className="text-brand-600" size={20} />
-                  <span className="text-sm font-medium text-slate-700">Smart TV 55"</span>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Utensils className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Kuchnia z pelnym wyposazeniem</span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Tv className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Telewizor Smart TV</span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <WashingMachine className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Pralka</span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Coffee className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Kawa i herbata</span>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 transition-shadow hover:shadow-md">
+                  <Laptop className="text-blue-600" size={20} />
+                  <span className="mt-2 block text-sm font-medium text-slate-700">Miejsce do pracy</span>
                 </div>
               </div>
             </div>
@@ -188,7 +204,7 @@ export default function HomePage() {
               <h2 className="text-xl font-semibold text-slate-900">Booking Card</h2>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-2">
               <DayPicker
                 mode="range"
                 selected={selectedRange}
@@ -196,10 +212,10 @@ export default function HomePage() {
                 disabled={disabledDays}
                 numberOfMonths={1}
                 weekStartsOn={1}
-                className="text-sm"
+                className="w-full text-sm"
                 classNames={{
-                  months: "flex flex-col",
-                  month: "space-y-2",
+                  months: "flex w-full flex-col",
+                  month: "w-full space-y-2",
                   caption: "flex items-center justify-between px-1 pt-1",
                   caption_label: "text-sm font-semibold text-slate-800",
                   nav: "flex items-center gap-1",
@@ -209,8 +225,8 @@ export default function HomePage() {
                   weekdays: "grid grid-cols-7 gap-1 mt-2",
                   weekday: "text-center text-[11px] font-medium text-slate-500",
                   week: "grid grid-cols-7 gap-1 mt-1",
-                  day: "h-9 w-full rounded-lg text-xs",
-                  day_button: "h-9 w-full rounded-lg hover:bg-brand-50",
+                  day: "h-10 w-full rounded-lg text-xs",
+                  day_button: "h-10 w-full rounded-lg hover:bg-brand-50",
                   selected: "bg-brand-600 text-white hover:bg-brand-600",
                   range_middle: "bg-brand-100 text-brand-700",
                   today: "border border-brand-300",
