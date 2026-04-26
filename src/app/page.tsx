@@ -14,7 +14,7 @@ import {
   startOfMonth,
   startOfWeek
 } from "date-fns";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Car, Coffee, Mountain, Wifi } from "lucide-react";
 import { blockedRanges, nightlyPrice } from "@/data/mockData";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -134,25 +134,70 @@ export default function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-brand-50 to-white p-6 md:p-10">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-brand-100">
-          <h1 className="text-2xl font-semibold text-brand-900 md:text-3xl">Rezerwacja noclegu</h1>
-          <p className="mt-1 text-sm text-slate-500">Publiczna strona klienta. Panel właściciela jest dostępny pod /admin.</p>
-        </header>
+    <main className="min-h-screen bg-slate-50 p-4 md:p-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <section className="overflow-hidden rounded-3xl bg-white shadow-lg shadow-brand-100/40 ring-1 ring-slate-200">
+          <div className="relative h-[300px] w-full md:h-[420px]">
+            <img
+              src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80"
+              alt="Nowoczesny apartament"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/65 via-slate-900/20 to-transparent" />
+            <div className="absolute bottom-0 p-6 md:p-10">
+              <p className="text-sm font-medium uppercase tracking-[0.22em] text-brand-100">Apartament premium</p>
+              <h1 className="mt-2 text-3xl font-semibold text-white md:text-5xl">Blekitny Brzeg</h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-200 md:text-base">
+                Eleganckie miejsce na odpoczynek blisko natury, z nowoczesnym wnetrzem i spokojna atmosfera.
+              </p>
+            </div>
+          </div>
+        </section>
 
-        <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-brand-100">
-            <div className="mb-4 flex items-center gap-2 text-brand-700">
-              <CalendarDays size={18} />
-              <h2 className="text-lg font-semibold">Wybierz termin pobytu</h2>
+        <section className="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <article className="space-y-6 rounded-3xl bg-white p-6 shadow-md shadow-slate-200/60 ring-1 ring-slate-200 md:p-8">
+            <div>
+              <h2 className="text-2xl font-semibold text-slate-900">Twoja nowoczesna wizytowka apartamentu</h2>
+              <p className="mt-3 leading-relaxed text-slate-600">
+                Apartament Blekitny Brzeg laczy minimalistyczny design i funkcjonalnosc. To idealny wybor na weekendowy
+                wyjazd lub dluzszy pobyt dla par i osob pracujacych zdalnie.
+              </p>
             </div>
 
-            <div className="mb-4 grid gap-3 md:grid-cols-2">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Udogodnienia</h3>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Wifi className="text-brand-600" size={20} />
+                  <span className="text-sm font-medium text-slate-700">Szybkie Wi-Fi</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Coffee className="text-brand-600" size={20} />
+                  <span className="text-sm font-medium text-slate-700">Ekspres do kawy</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Car className="text-brand-600" size={20} />
+                  <span className="text-sm font-medium text-slate-700">Prywatny parking</span>
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                  <Mountain className="text-brand-600" size={20} />
+                  <span className="text-sm font-medium text-slate-700">Widok na nature</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <aside className="rounded-3xl bg-white p-6 shadow-lg shadow-brand-100/40 ring-1 ring-slate-200 md:p-7">
+            <div className="mb-5 flex items-center gap-2 text-brand-700">
+              <CalendarDays size={18} />
+              <h2 className="text-xl font-semibold text-slate-900">Booking Card</h2>
+            </div>
+
+            <div className="mb-4 grid gap-3 sm:grid-cols-2">
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
               >
                 {[
                   "Styczen",
@@ -176,7 +221,7 @@ export default function HomePage() {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
               >
                 {Array.from({ length: 7 }).map((_, idx) => {
                   const year = yearNow - 1 + idx;
@@ -189,13 +234,13 @@ export default function HomePage() {
               </select>
             </div>
 
-            <div className="mb-3 grid grid-cols-7 gap-2 text-center text-xs font-medium text-slate-500">
+            <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-slate-500">
               {["Pon", "Wt", "Sr", "Czw", "Pt", "Sob", "Niedz"].map((label) => (
                 <span key={label}>{label}</span>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1">
               {calendarDays.map((day) => {
                 const blocked = isBlockedDate(day);
                 const past = isBefore(day, today);
@@ -209,7 +254,7 @@ export default function HomePage() {
                     key={day.toISOString()}
                     type="button"
                     onClick={() => handleDayClick(day)}
-                    className={`h-12 rounded-xl text-sm transition ${
+                    className={`h-9 rounded-lg text-xs transition ${
                       outOfMonth
                         ? "bg-slate-50 text-slate-300"
                         : past
@@ -229,29 +274,24 @@ export default function HomePage() {
               })}
             </div>
 
-            <p className="mt-4 text-xs text-slate-500">Nowe rezerwacje nie blokuja lokalnie kalendarza. Zajete sa tylko terminy mock.</p>
-          </div>
-
-          <aside className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-brand-100">
-            <h3 className="text-lg font-semibold text-brand-900">Podsumowanie</h3>
-            <dl className="mt-4 space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-500">Data od</dt>
-                <dd className="font-medium">{fromDate ? format(fromDate, "dd.MM.yyyy") : "-"}</dd>
+            <div className="mt-5 space-y-2 rounded-2xl bg-brand-50 p-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">Od</span>
+                <span className="font-medium text-slate-800">{fromDate ? format(fromDate, "dd.MM.yyyy") : "-"}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-500">Data do</dt>
-                <dd className="font-medium">{toDate ? format(toDate, "dd.MM.yyyy") : "-"}</dd>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">Do</span>
+                <span className="font-medium text-slate-800">{toDate ? format(toDate, "dd.MM.yyyy") : "-"}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-slate-500">Liczba nocy</dt>
-                <dd className="font-medium">{nights || "-"}</dd>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">Noce</span>
+                <span className="font-medium text-slate-800">{nights || "-"}</span>
               </div>
-              <div className="mt-2 rounded-xl bg-brand-50 p-3">
-                <dt className="text-xs uppercase tracking-wide text-brand-700">Cena laczna</dt>
-                <dd className="mt-1 text-2xl font-semibold text-brand-900">{totalPrice ? `${totalPrice} zl` : "-"}</dd>
+              <div className="border-t border-brand-200 pt-2">
+                <p className="text-xs uppercase tracking-wide text-brand-700">Cena laczna</p>
+                <p className="text-2xl font-semibold text-brand-900">{totalPrice ? `${totalPrice} zl` : "-"}</p>
               </div>
-            </dl>
+            </div>
 
             <div className="mt-4 grid gap-3">
               <input
@@ -279,9 +319,9 @@ export default function HomePage() {
                 type="button"
                 onClick={handleBookingSubmit}
                 disabled={isSavingBooking}
-                className="w-full rounded-xl bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70"
+                className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isSavingBooking ? "Zapisywanie..." : "Zarezerwuj termin"}
+                {isSavingBooking ? "Zapisywanie..." : "Zarezerwuj teraz"}
               </button>
             </div>
 
